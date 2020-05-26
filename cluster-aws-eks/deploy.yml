@@ -1,0 +1,39 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+
+    - name: Deploy Nginx
+      k8s:
+        definition: '{{ item }}'
+        kubeconfig: '{{ k8s_kubeconfig }}'
+        state: present
+      loop:
+        - "{{ lookup('template', 'nginx/nginx.yml') | from_yaml_all | list }}"
+
+    - name: Get load balancer 
+      k8s_info:
+        kubeconfig: '{{ k8s_kubeconfig }}'
+        kind: Service
+        name: nginx-web
+        namespace: default
+      register: nginx_svc
+
+    - name: Set the load balancer URL as a fact.
+      set_fact:
+        nginx_lb_host: "{{ nginx_svc['resources'][0]['status']['loadBalancer']['ingress'][0]['hostname'] }}"
+      when: aws_environment | bool
+
+    - name: Wait for Load Balancer to respond.
+      uri:
+        url: "http://{{ nginx_lb_host }}"
+      register: lb_result
+      until: lb_result.status == 200
+      retries: 60
+      delay: 5
+      when: aws_environment | bool
+

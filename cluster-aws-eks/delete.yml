@@ -1,0 +1,31 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+
+    - name: Delete ngnix resources.
+      k8s:
+        definition: '{{ item }}'
+        kubeconfig: '{{ k8s_kubeconfig }}'
+        state: absent
+      loop:
+        - "{{ lookup('template', 'ngnix/ngnix.yml') | from_yaml_all | list }}"
+
+    - name: Pause execution for two minutes for resource deletion.
+      pause:
+        minutes: 2
+
+    - name: Delete CloudFormation stacks.
+      cloudformation:
+        stack_name: "{{ item }}"
+        state: absent
+        region: "{{ aws_region }}"
+        profile: "{{ aws_profile }}"
+      with_items:
+        - eks-evisort-nodegroup
+        - eks-evisort-cluster
+        - eks-evisort-vpc

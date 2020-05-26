@@ -1,0 +1,25 @@
+---
+# AWS Settings.
+aws_environment: true
+aws_region: us-west-2
+aws_profile: default
+
+
+# This variable will be populated during playbook runs.
+stack_outputs: {}
+
+# EKS Cluster settings.
+eks_cluster_name: eks-evisort
+# See: https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html
+eks_kubernetes_version: "1.15"
+
+# Nodegroup settings.
+eks_nodegroup_name: eks-evisort-nodegroup
+eks_nodegroup_instance_type: t3.small
+eks_nodegroup_cluster_size: 3
+
+
+
+# Kubernetes settings.
+k8s_kubeconfig: ~/.kube/eks-evisort
+k8s_no_log: true
