@@ -1,0 +1,26 @@
+all:
+force:
+
+token=<your-github-token>
+user=<your-github-username>
+org=<your-github-organization>
+
+auth_opt=-u $(user):$(token)
+
+# note: not all repos are in there!  hitting the page limit of 30.
+x.repos.json:  force
+                curl -Ks $(auth_opt) https://api.github.com/orgs/$(org)/repos?per_page=100 \
+                > $@
+
+clone-all: x.repos.json
+          cat x.repos.json \
+          | jq -M -r '.[]|.ssh_url' \
+          | while read url; do (test -e $$(echo $$url | sed 's|.*/\(.*\)\.git|\1|') || git clone $$url ); done
+
+list-all: x.repos.json
+          cat x.repos.json \
+          | jq -M -r '.[]|.ssh_url' \
+          | while read url; do (echo $$url); done
+
+pull-all:
+          for d in ./*; do echo $$d; (cd $$d; git pull); done

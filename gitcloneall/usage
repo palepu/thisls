@@ -1,0 +1,8 @@
+i
+    <your-github-token>: Get a token on github.
+    <your-github-username>
+    <your-github-org>: Most likely company name for us it’s globality-corp
+
+What I have is a directory called ~/Code/mycomapny, in it’s root I have this
+Makefile and I do make clone-all in order to clone all repositories and I can
+also do make pull-all to pull all the recent changes across the repositories.
